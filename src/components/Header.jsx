@@ -1,10 +1,22 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { getAuth, onAuthStateChanged } from 'firebase/auth'
 
 export default function Header() {
+  const [pageState, setPageState] = useState('Sign in')
   const location = useLocation()
   const navigate = useNavigate()
-  function pathMathRoute(route) {
+  const auth = getAuth()
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setPageState('Profile')
+      } else {
+        setPageState('Sign in')
+      }
+    })
+  }, [auth])
+  function pathMatchRoute(route) {
     if (route === location.pathname) {
       return true
     }
@@ -24,7 +36,7 @@ export default function Header() {
           <ul className="flex space-x-10">
             <li
               className={`cursor-pointer py-3 text-sm font-semibold border-b-[3px] ${
-                pathMathRoute('/')
+                pathMatchRoute('/')
                   ? 'text-black border-b-red-500'
                   : 'border-b-transparent text-gray-400'
               }`}
@@ -34,7 +46,7 @@ export default function Header() {
             </li>
             <li
               className={`cursor-pointer py-3 text-sm font-semibold border-b-[3px] ${
-                pathMathRoute('/offers')
+                pathMatchRoute('/offers')
                   ? 'text-black border-b-red-500'
                   : 'border-b-transparent text-gray-400'
               }`}
@@ -44,13 +56,13 @@ export default function Header() {
             </li>
             <li
               className={`cursor-pointer py-3 text-sm font-semibold border-b-[3px] ${
-                pathMathRoute('/sign-in')
+                pathMatchRoute('/sign-in') || pathMatchRoute('/profile')
                   ? 'text-black border-b-red-500'
                   : 'border-b-transparent text-gray-400'
               }`}
-              onClick={() => navigate('/sign-in')}
+              onClick={() => navigate('/profile')}
             >
-              Sign up
+              {pageState}
             </li>
           </ul>
         </div>
