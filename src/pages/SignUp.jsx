@@ -2,25 +2,61 @@ import React, { useState } from 'react'
 import { AiFillEyeInvisible, AiFillEye } from 'react-icons/ai'
 import { Link } from 'react-router-dom'
 import OAuth from '../components/OAuth'
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from 'firebase/auth'
+import { db } from '../firebase'
+import { serverTimestamp, setDoc, doc } from 'firebase/firestore'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
 export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false)
-  const [formDate, setFormData] = useState({
+  const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
   })
-  const { name, email, password } = formDate
+  const { name, email, password } = formData
+  const navigate = useNavigate()
   function onChange(e) {
     setFormData((prevState) => ({
       ...prevState,
       [e.target.id]: e.target.value,
     }))
   }
+  async function onSubmit(e) {
+    e.preventDefault()
+    try {
+      const auth = getAuth()
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      )
+      updateProfile(auth.currentUser, {
+        displayName: name,
+      })
+      const user = userCredential.user
+      const formDataCopy = { ...formData }
+      delete formDataCopy.password
+      formDataCopy.timestamp = serverTimestamp()
+      await setDoc(doc(db, 'users', user.uid), formDataCopy)
+      // toast.success('Sign up was successful')
+      navigate('/')
+      //console.log(user)
+    } catch (error) {
+      //console.log(error)
+      toast.error('Something went wrong with the registration')
+    }
+  }
   return (
     <section>
       <h1 className="text-3xl text-center mt-6 font-bold">Sign Up</h1>
       <div className="flex flex-col items-center flex-wrap px-6 py-12 mx-auto">
         <form
+          onSubmit={onSubmit}
           action=""
           className="w-full md:w-[67%] lg:w-[40%] mt-6 text-xl text-gray-700 border-gray-300 rounded transition ease-in-out"
         >
@@ -82,7 +118,7 @@ export default function SignUp() {
           </div>
           <button
             type="submit"
-            className="w-full md:w-[40%] bg-blue-600 text-white px-7 py-3 text-sm font-medium uppercase rounded shadow-md hover:bg-blue-700 transition duration-150 ease-in-out hover:shadow-lg active:bg-blue-800"
+            className="w-full bg-blue-600 text-white px-7 py-3 text-sm font-medium uppercase rounded shadow-md hover:bg-blue-700 transition duration-150 ease-in-out hover:shadow-lg active:bg-blue-800"
           >
             Sign UP
           </button>
