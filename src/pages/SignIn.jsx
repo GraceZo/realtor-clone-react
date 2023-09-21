@@ -1,7 +1,10 @@
 import React, { useState } from 'react'
 import { AiFillEyeInvisible, AiFillEye } from 'react-icons/ai'
-import { Link } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import OAuth from '../components/OAuth'
+import { signInWithEmailAndPassword, auth, getAuth } from 'firebase/auth'
+import { toast } from 'react-toastify'
+
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false)
   const [formDate, setFormData] = useState({
@@ -9,17 +12,35 @@ export default function SignIn() {
     password: '',
   })
   const { email, password } = formDate
+  const navigate = useNavigate()
   function onChange(e) {
     setFormData((prevState) => ({
       ...prevState,
       [e.target.id]: e.target.value,
     }))
   }
+  async function onSubmit(e) {
+    e.preventDefault()
+    try {
+      const auth = getAuth()
+      const userCrendentials = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      )
+      if (userCrendentials.user) {
+        navigate('/')
+      }
+    } catch (error) {
+      toast.error('Bad user credentials')
+    }
+  }
   return (
     <section>
       <h1 className="text-3xl text-center mt-6 font-bold">Sign In</h1>
       <div className="flex flex-col items-center flex-wrap px-6 py-12 mx-auto">
         <form
+          onSubmit={onSubmit}
           action=""
           className="w-full md:w-[67%] lg:w-[40%] mt-6 text-xl text-gray-700 border-gray-300 rounded transition ease-in-out"
         >
