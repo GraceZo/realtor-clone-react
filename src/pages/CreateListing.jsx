@@ -30,8 +30,8 @@ export default function CreateListing() {
     offer: false,
     regularPrice: 0,
     discountPrice: 0,
-    latitude: 0,
-    longitude: 0,
+    latitude: null,
+    longitude: null,
     images: {},
   })
   const {
@@ -155,12 +155,13 @@ export default function CreateListing() {
       imgUrls,
       geolocation,
       timestamp: serverTimestamp(),
+      userRef: auth.currentUser.uid,
     }
     delete formDataCopy.images
     !formDataCopy.offer && delete formDataCopy.discountPrice
     delete formDataCopy.latitude
     delete formDataCopy.longitude
-    const docRef = await addDoc(collection(db, 'listing'), formDataCopy)
+    const docRef = await addDoc(collection(db, 'listings'), formDataCopy)
     setLoading(false)
     toast.success('Listing created')
     navigate(`/category/${formDataCopy.type}/${docRef.id}`)
