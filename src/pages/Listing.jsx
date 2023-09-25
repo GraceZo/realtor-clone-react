@@ -23,7 +23,6 @@ export default function Listing() {
   const auth = getAuth()
   const params = useParams()
   const [listing, setListing] = useState(null)
-  const [loading, setLoading] = useState(true)
   const [shareLinkCopied, setShareLinkCopied] = useState(false)
   const [contactLandlord, setContactLandlord] = useState(false)
   SwiperCore.use([Autoplay, Navigation, Pagination])
@@ -33,14 +32,10 @@ export default function Listing() {
       const docSnap = await getDoc(docRef)
       if (docSnap.exists()) {
         setListing(docSnap.data())
-        setLoading(false)
       }
     }
     fetchListing()
   }, [params.listingId])
-  if (loading) {
-    return <Spinner />
-  }
   return (
     <main>
       <Swiper
